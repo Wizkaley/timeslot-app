@@ -118,12 +118,16 @@ func (ts *TimeslotServiceImplementaion) GetTimeSlotsByUserName(ctx *gin.Context)
 		ctx.JSON(http.StatusInternalServerError, utils.ErrorHelper("Error fetching time slots", err))
 		return
 	}
-
-	tsr := models.TimeSlotResponse{
-		UserName:  userName,
-		TimeSlots: timeSlots,
+	if len(timeSlots) == 0 {
+		ctx.JSON(http.StatusOK, gin.H{"message": "no time slots found for the user"})
+		return
+	} else {
+		tsr := models.TimeSlotResponse{
+			UserName:  userName,
+			TimeSlots: timeSlots,
+		}
+		json.NewEncoder(ctx.Writer).Encode(tsr)
 	}
-	json.NewEncoder(ctx.Writer).Encode(tsr)
 }
 
 // ShowAccount godoc
@@ -262,4 +266,56 @@ func (ts *TimeslotServiceImplementaion) GetUserTimeSlotsAndConvertToParticipant(
 	}
 
 	return initiator, nil
+}
+
+// ShowAccount godoc
+// @Summary      Delete a time slot
+// @Description  Delete time slot for a user by name
+// @Tags         Timeslots
+// @Accept       json
+// @Produce      json
+// @Param        username   path   string   true  "Timeslot request body"
+// @Param        body       body    models.DeleteTimeSlotRequest   true  "Delete time slot request body"
+// @Success      200  {object}  models.ServiceMessage
+// @Failure      400  {object}  models.ServiceError
+// @Failure      500  {object}  models.ServiceError
+// @Router       /:username [delete]
+func (ts *TimeslotServiceImplementaion) DeleteTimeSlotsByUserName(ctx *gin.Context) {
+	userName := ctx.Param("username")
+	if userName == "" {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorHelper("Invalid request body", errors.New("username not provided")))
+		return
+	}
+
+	var timeslot models.DeleteTimeSlotRequest
+
+	if err := ctx.BindJSON(&timeslot); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorHelper("Invalid request body", err))
+		return
+	}
+
+	verifyTimeSlotExists, err := ts.TimeslotRepo.GetTimeSlotsByUserName(userName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorHelper("Error fetching time slots", err))
+		return
+	}
+
+	if len(verifyTimeSlotExists) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "no time slots found for the user"})
+		return
+	}
+
+	if !utils.SearchString(verifyTimeSlotExists, timeslot.Timeslot) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Time slot not found for the user"})
+		return
+	}
+
+	fmt.Println(userName, timeslot.Timeslot)
+	err = ts.TimeslotRepo.DeleteTimeSlotsByUserName(userName, timeslot.Timeslot)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorHelper("Error deleting time slots", err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Time slots deleted successfully"})
 }

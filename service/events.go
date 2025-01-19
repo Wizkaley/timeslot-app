@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"net/http"
 	"timeslot-app/models"
 	"timeslot-app/repository"
@@ -87,16 +86,16 @@ func (es *EventService) CreateEvent(ctx *gin.Context) {
 
 	userTimeSlots, err := es.TimeslotRepo.GetTimeSlotsByUserName(eventReq.EventOwner)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": errors.New("error fetching user time slots")})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching user time slots"})
 		return
 	}
 	if len(userTimeSlots) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": errors.New("user does not have any time slots")})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "user does not have any time slots"})
 		return
 	}
 
 	if !utils.SearchString(userTimeSlots, eventReq.EventTimeSlot) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": errors.New("user does not have the requested time slot")})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "user does not have the requested time slot"})
 		return
 	}
 

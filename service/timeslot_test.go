@@ -236,3 +236,79 @@ func TestGetTimeSlotsByUserName(t *testing.T) {
 		mockTimeslotRepo.AssertExpectations(t)
 	})
 }
+
+// type MockTimeslotRepo struct {
+// 	mock.Mock
+// }
+
+func (m *MockTimeslotRepo) RecommendSlots(req models.RecommendSlotsRequest) ([]models.TimeSlot, error) {
+	args := m.Called(req)
+	return args.Get(0).([]models.TimeSlot), args.Error(1)
+}
+
+func TestRecommendSlots(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockRepo := new(MockTimeslotRepo)
+	timeslotService := NewTimeslotService(mockRepo)
+
+	router := gin.Default()
+	router.POST("/recommend-slots", timeslotService.RecommendSlots)
+
+	t.Run("Success", func(t *testing.T) {
+		reqBody := models.RecommendSlotsRequest{
+			UserID: "test-user-id",
+			// Add other fields as necessary
+		}
+		reqJSON, _ := json.Marshal(reqBody)
+
+		expectedSlots := []models.TimeSlot{
+			{ID: "slot1", Time: "10:00 AM"},
+			{ID: "slot2", Time: "11:00 AM"},
+		}
+
+		mockRepo.On("RecommendSlots", reqBody).Return(expectedSlots, nil)
+
+		req, _ := http.NewRequest(http.MethodPost, "/recommend-slots", bytes.NewBuffer(reqJSON))
+		req.Header.Set("Content-Type", "application/json")
+		resp := httptest.NewRecorder()
+
+		router.ServeHTTP(resp, req)
+
+		assert.Equal(t, http.StatusOK, resp.Code)
+		var response map[string][]models.TimeSlot
+		err := json.Unmarshal(resp.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedSlots, response["slots"])
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("InvalidRequestBody", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodPost, "/recommend-slots", bytes.NewBuffer([]byte(`{}`)))
+		req.Header.Set("Content-Type", "application/json")
+		resp := httptest.NewRecorder()
+
+		router.ServeHTTP(resp, req)
+
+		assert.Equal(t, http.StatusBadRequest, resp.Code)
+	})
+
+	t.Run("InternalServerError", func(t *testing.T) {
+		reqBody := models.RecommendSlotsRequest{
+			UserID: "test-user-id",
+			// Add other fields as necessary
+		}
+		reqJSON, _ := json.Marshal(reqBody)
+
+		mockRepo.On("RecommendSlots", reqBody).Return(nil, assert.AnError)
+
+		req, _ := http.NewRequest(http.MethodPost, "/recommend-slots", bytes.NewBuffer(reqJSON))
+		req.Header.Set("Content-Type", "application/json")
+		resp := httptest.NewRecorder()
+
+		router.ServeHTTP(resp, req)
+
+		assert.Equal(t, http.StatusInternalServerError, resp.Code)
+		mockRepo.AssertExpectations(t)
+	})
+}
