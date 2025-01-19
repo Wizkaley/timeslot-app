@@ -60,6 +60,57 @@
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete time slot for a user by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Timeslots"
+                ],
+                "summary": "Delete a time slot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Timeslot request body",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Delete time slot request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteTimeSlotRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ServiceMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ServiceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ServiceError"
+                        }
+                    }
+                }
             }
         },
         "/events": {
@@ -381,6 +432,15 @@
         }
     },
     "definitions": {
+        "models.DeleteTimeSlotRequest": {
+            "type": "object",
+            "properties": {
+                "timeslot": {
+                    "type": "string",
+                    "example": "02 Jan 06 2-4 PM MST"
+                }
+            }
+        },
         "models.Event": {
             "type": "object",
             "properties": {

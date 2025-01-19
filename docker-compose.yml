@@ -3,7 +3,7 @@ version: "3.9"
 services:
   go-timeslot-app:
     container_name: go-timeslot-app
-    image: wizkaley/go-timeslot-app:5.0.1
+    image: wizkaley/go-timeslot-app:5.0.4
     build: .
     environment:
       - host=go_db

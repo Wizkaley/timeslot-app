@@ -22,20 +22,11 @@ type App struct {
 var Service *App
 
 func InitApp() (*App, error) {
-	// viper.AddConfigPath("/Users/eshankaley/go/src/timeslot-app/")
-	// viper.SetConfigName("config")
 
-	// viper.AutomaticEnv()
-
-	// err := viper.ReadInConfig()
-	// if err != nil {
 	cfg := models.Config{}
-	// fmt.Println("Error reading config file, %s", err)
 	cfg.DBConfig.Host = os.Getenv("host")
 	cfg.DBConfig.User = os.Getenv("user")
 	cfg.DBConfig.Password = os.Getenv("password")
-	// return nil, err
-	// }
 
 	err := viper.Unmarshal(&cfg)
 	if err != nil {
@@ -43,7 +34,6 @@ func InitApp() (*App, error) {
 	}
 
 	fmt.Println("Config loaded successfully", cfg)
-	// logger.Logger(cfg.LogConfig.LogLevel)
 
 	database := db.Connection(cfg.DBConfig.Host, cfg.DBConfig.User, cfg.DBConfig.Password)
 
@@ -55,7 +45,7 @@ func InitApp() (*App, error) {
 	app.Config = cfg
 
 	app.DB = database
-	app.TimeslotService = service.Init(database)
+	app.TimeslotService = service.NewTimeslotService(database)
 	app.UserService = service.NewUserService(database)
 	app.EventService = service.NewEventService(database)
 	return app, nil

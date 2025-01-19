@@ -10,8 +10,6 @@ import (
 
 func Connection(host, uname, pass string) *pgx.Conn {
 
-	// url := "postgres://%s:%s@%s:%d/%s"
-	// psqlInfo := fmt.Sprintf(url, uname, pass, host, 5432, "timeslot")
 	config := pgx.ConnConfig{
 		Host:     host,
 		User:     uname,

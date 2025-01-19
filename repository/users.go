@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 	"timeslot-app/models"
 
 	"github.com/gofrs/uuid"
@@ -28,7 +29,7 @@ func (ur *UserRepoImplementation) Create(user models.User) error {
 
 	//check if user with the same name already exists
 	exists, err := ur.UserExists(user.Name)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "does not exist") {
 		return err
 	}
 

@@ -54,7 +54,7 @@ func (er *EventRepoImplementation) DeleteEvent(eventID string) error {
 }
 
 func (er *EventRepoImplementation) GetEventsForUser(username string) ([]models.Event, error) {
-	qry := `select e.* from events e
+	qry := `select e.id, e.event_owner, e.title, e.event_start_time, e.event_end_time, e.participants from events e
 		join users u on e.event_owner=u.id 
 		where u.name = $1`
 
@@ -66,7 +66,7 @@ func (er *EventRepoImplementation) GetEventsForUser(username string) ([]models.E
 	for rows.Next() {
 
 		var event models.Event
-		err := rows.Scan(&event.ID, &event.Title, &event.EventOwner, &event.EventStartTime, &event.EventEndTime, &event.Participants)
+		err := rows.Scan(&event.ID, &event.EventOwner, &event.Title, &event.EventStartTime, &event.EventEndTime, &event.Participants)
 		if err != nil {
 			return nil, err
 		}

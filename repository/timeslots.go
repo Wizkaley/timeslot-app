@@ -19,8 +19,7 @@ func NewTimeslotRepository(dbconn *pgx.Conn) TimeslotRepo {
 
 type TimeslotRepo interface {
 	Create(timeSlots []models.TimeSlot) error
-	// Delete() error
-	// Update() error
+	DeleteTimeSlotsByUserName(userName, timeSlot string) error
 	GetTimeSlotsByUserName(userName string) ([]string, error)
 }
 
@@ -61,14 +60,12 @@ func (ts *TimeslotRepoImplementation) GetTimeSlotsByUserName(userName string) ([
 	return timeSlots, nil
 }
 
-// func (ts *Time)
+func (ts *TimeslotRepoImplementation) DeleteTimeSlotsByUserName(userName, timeSlot string) error {
 
-// func (ts *TimeslotRepoImplementation) Delete() error {
-// 	return nil
-// }
-// func (ts *TimeslotRepoImplementation) Update() error {
-// 	return nil
-// }
-// func (ts *TimeslotRepoImplementation) Get() error {
-// 	return nil
-// }
+	deleteQuery := `delete from time_slots where user_id in (select id from users where name=$1) and time_slot=$2`
+	_, err := ts.db.Exec(deleteQuery, userName, timeSlot)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -54,6 +54,7 @@ func NewRouter(app *app.App) *gin.Engine {
 		timeslot.POST("", app.TimeslotService.CreateTimeSlot)
 		timeslot.GET("/:username", app.TimeslotService.GetTimeSlotsByUserName)
 		timeslot.GET("/recommend", app.TimeslotService.RecommendSlots)
+		timeslot.DELETE("/:username", app.TimeslotService.DeleteTimeSlotsByUserName)
 	}
 
 	{

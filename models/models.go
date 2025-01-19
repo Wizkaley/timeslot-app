@@ -47,3 +47,7 @@ type TimeSlotResponse struct {
 type ServiceMessage struct {
 	Message string `json:"message"`
 }
+
+type DeleteTimeSlotRequest struct {
+	Timeslot string `json:"timeslot" example:"02 Jan 06 2-4 PM MST"`
+}
